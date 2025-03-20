@@ -20,10 +20,25 @@ const CharacterWizard: React.FC = () => {
   
   // Check if API keys are set whenever this component renders
   useEffect(() => {
+    const checkApiKeys = () => {
+      const currentKeys = getApiKeysSet();
+      setApiKeysSet(currentKeys);
+      console.log("API keys status in CharacterWizard:", currentKeys);
+    };
+    
+    checkApiKeys();
+    
+    // Set up interval to check periodically
+    const interval = setInterval(checkApiKeys, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  const handleApiKeysUpdated = () => {
     const currentKeys = getApiKeysSet();
     setApiKeysSet(currentKeys);
-    console.log("API keys status in CharacterWizard:", currentKeys);
-  }, []);
+    console.log("API keys updated in CharacterWizard:", currentKeys);
+  };
   
   const handleGenerateCharacter = async (description: CharacterDescription) => {
     // Double-check API keys are set before proceeding
@@ -91,7 +106,7 @@ const CharacterWizard: React.FC = () => {
       return <CharacterForm 
         onSubmit={handleGenerateCharacter} 
         isLoading={loading} 
-        onApiKeysUpdated={() => setApiKeysSet(getApiKeysSet())}
+        onApiKeysUpdated={handleApiKeysUpdated}
       />;
     }
     

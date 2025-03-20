@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { setApiKeys, getApiKeysSet } from "@/lib/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AnimatedContainer from "./AnimatedContainer";
 import { AlertCircle, Key, LinkIcon, ArrowRight, Wand } from "lucide-react";
+import { toast } from "sonner";
 
 interface CharacterFormProps {
   onSubmit: (description: CharacterDescription) => void;

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,8 +27,19 @@ const CharacterForm: React.FC<CharacterFormProps> = ({ onSubmit, isLoading }) =>
     runware: "",
   });
   
-  const [apiKeysSet, setApiKeysSet] = useState(getApiKeysSet());
+  const [apiKeysSet, setLocalApiKeysSet] = useState(getApiKeysSet());
   const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(!apiKeysSet.groq);
+  
+  // Effect to check API keys on component mount and after they are set
+  useEffect(() => {
+    const currentApiKeysSet = getApiKeysSet();
+    setLocalApiKeysSet(currentApiKeysSet);
+    
+    // If the Groq API key is set, we can close the dialog automatically
+    if (currentApiKeysSet.groq && apiKeysDialogOpen) {
+      setApiKeysDialogOpen(false);
+    }
+  }, [apiKeysDialogOpen]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +54,13 @@ const CharacterForm: React.FC<CharacterFormProps> = ({ onSubmit, isLoading }) =>
       runware: apiKeys.runware,
     });
     
-    setApiKeysSet(getApiKeysSet());
+    setLocalApiKeysSet(getApiKeysSet());
     setApiKeysDialogOpen(false);
+    
+    // Show success toast or feedback
+    if (apiKeys.groq) {
+      console.log("API keys set successfully!");
+    }
   };
 
   return (

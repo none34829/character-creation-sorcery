@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Character, WizardStep, CharacterDescription } from "@/types";
 import { Button } from "@/components/ui/button";
 import WizardSteps from "./WizardSteps";
@@ -7,7 +7,7 @@ import CharacterForm from "./CharacterForm";
 import CharacterDetails from "./CharacterDetails";
 import AvatarGenerator from "./AvatarGenerator";
 import CharacterPreview from "./CharacterPreview";
-import { generateCharacter } from "@/lib/api";
+import { generateCharacter, getApiKeysSet } from "@/lib/api";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,8 +16,21 @@ const CharacterWizard: React.FC = () => {
   const [completedSteps, setCompletedSteps] = useState<Set<WizardStep>>(new Set());
   const [loading, setLoading] = useState(false);
   const [character, setCharacter] = useState<Character | null>(null);
+  const [apiKeysSet, setApiKeysSet] = useState(getApiKeysSet());
+  
+  // Check if API keys are set whenever this component renders
+  useEffect(() => {
+    setApiKeysSet(getApiKeysSet());
+  }, []);
   
   const handleGenerateCharacter = async (description: CharacterDescription) => {
+    // Double-check API keys are set before proceeding
+    const currentApiKeysSet = getApiKeysSet();
+    if (!currentApiKeysSet.groq) {
+      toast.error("Please set your Groq API key first");
+      return;
+    }
+    
     setLoading(true);
     
     try {

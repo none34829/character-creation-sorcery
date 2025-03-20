@@ -35,6 +35,7 @@ const CharacterWizard: React.FC = () => {
   }, []);
   
   const handleApiKeysUpdated = () => {
+    console.log("handleApiKeysUpdated called");
     const currentKeys = getApiKeysSet();
     setApiKeysSet(currentKeys);
     console.log("API keys updated in CharacterWizard:", currentKeys);
@@ -102,12 +103,17 @@ const CharacterWizard: React.FC = () => {
   };
   
   const renderStepContent = () => {
+    console.log("Rendering step:", currentStep);
+    console.log("API keys set:", apiKeysSet);
+    
     if (currentStep === "description") {
-      return <CharacterForm 
-        onSubmit={handleGenerateCharacter} 
-        isLoading={loading} 
-        onApiKeysUpdated={handleApiKeysUpdated}
-      />;
+      return (
+        <CharacterForm 
+          onSubmit={handleGenerateCharacter} 
+          isLoading={loading} 
+          onApiKeysUpdated={handleApiKeysUpdated}
+        />
+      );
     }
     
     if (!character) return null;
@@ -126,6 +132,8 @@ const CharacterWizard: React.FC = () => {
     
     return null;
   };
+
+  console.log("CharacterWizard render, currentStep:", currentStep);
 
   return (
     <div className="min-h-screen pt-10 pb-20 px-4 sm:px-6">

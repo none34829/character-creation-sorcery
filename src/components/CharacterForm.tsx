@@ -37,10 +37,12 @@ const CharacterForm: React.FC<CharacterFormProps> = ({
   const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false);
   
   useEffect(() => {
+    console.log("CharacterForm mounted");
     const currentApiKeysSet = getApiKeysSet();
     setLocalApiKeysSet(currentApiKeysSet);
     
     if (!currentApiKeysSet.groq) {
+      console.log("Opening API keys dialog because Groq key is not set");
       setApiKeysDialogOpen(true);
     }
     
@@ -48,20 +50,24 @@ const CharacterForm: React.FC<CharacterFormProps> = ({
   }, []);
   
   useEffect(() => {
-    const currentApiKeysSet = getApiKeysSet();
-    setLocalApiKeysSet(currentApiKeysSet);
-    
-    if (currentApiKeysSet.groq && !apiKeysDialogOpen && onApiKeysUpdated) {
+    if (onApiKeysUpdated) {
+      console.log("Calling onApiKeysUpdated from useEffect");
       onApiKeysUpdated();
     }
   }, [apiKeysDialogOpen, onApiKeysUpdated]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.text.trim()) return;
+    console.log("Form submitted with description:", description);
+    
+    if (!description.text.trim()) {
+      toast.error("Please provide a character description");
+      return;
+    }
     
     const currentApiKeysSet = getApiKeysSet();
     if (!currentApiKeysSet.groq) {
+      console.log("Opening API keys dialog because Groq key is not set");
       setApiKeysDialogOpen(true);
       return;
     }
@@ -70,6 +76,13 @@ const CharacterForm: React.FC<CharacterFormProps> = ({
   };
   
   const handleSetApiKeys = () => {
+    console.log("Setting API keys:", apiKeys);
+    
+    if (!apiKeys.groq.trim()) {
+      toast.error("Groq API key is required");
+      return;
+    }
+    
     setApiKeys({
       groq: apiKeys.groq,
       exa: apiKeys.exa,
@@ -80,19 +93,19 @@ const CharacterForm: React.FC<CharacterFormProps> = ({
     setLocalApiKeysSet(updatedKeys);
     
     console.log("API keys set successfully:", updatedKeys);
+    toast.success("API keys saved successfully");
     
-    if (apiKeys.groq) {
-      setApiKeysDialogOpen(false);
-      
-      if (onApiKeysUpdated) {
-        setTimeout(() => {
-          onApiKeysUpdated();
-        }, 100);
-      }
-    } else {
-      toast.error("Groq API key is required");
+    setApiKeysDialogOpen(false);
+    
+    if (onApiKeysUpdated) {
+      console.log("Calling onApiKeysUpdated after setting keys");
+      setTimeout(() => {
+        onApiKeysUpdated();
+      }, 100);
     }
   };
+
+  console.log("CharacterForm render, dialog open:", apiKeysDialogOpen);
 
   return (
     <div>
@@ -189,7 +202,7 @@ const CharacterForm: React.FC<CharacterFormProps> = ({
             
             <Button 
               onClick={handleSetApiKeys} 
-              disabled={!apiKeys.groq} 
+              disabled={!apiKeys.groq.trim()} 
               className="w-full"
             >
               Save API Keys

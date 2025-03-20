@@ -90,7 +90,7 @@ const AvatarGenerator: React.FC<AvatarGeneratorProps> = ({
                 </p>
               </div>
             )}
-          </CardContent>
+          </Card>
           
           <div className="space-y-6">
             <div className="space-y-4">

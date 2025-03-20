@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +12,14 @@ import { AlertCircle, Key, LinkIcon, ArrowRight, Wand } from "lucide-react";
 interface CharacterFormProps {
   onSubmit: (description: CharacterDescription) => void;
   isLoading: boolean;
+  onApiKeysUpdated?: () => void;
 }
 
-const CharacterForm: React.FC<CharacterFormProps> = ({ onSubmit, isLoading }) => {
+const CharacterForm: React.FC<CharacterFormProps> = ({ 
+  onSubmit, 
+  isLoading,
+  onApiKeysUpdated
+}) => {
   const [description, setDescription] = useState<CharacterDescription>({
     text: "",
     url: "",
@@ -28,22 +32,38 @@ const CharacterForm: React.FC<CharacterFormProps> = ({ onSubmit, isLoading }) =>
   });
   
   const [apiKeysSet, setLocalApiKeysSet] = useState(getApiKeysSet());
-  const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(!apiKeysSet.groq);
+  const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false);
   
-  // Effect to check API keys on component mount and after they are set
   useEffect(() => {
     const currentApiKeysSet = getApiKeysSet();
     setLocalApiKeysSet(currentApiKeysSet);
     
-    // If the Groq API key is set, we can close the dialog automatically
-    if (currentApiKeysSet.groq && apiKeysDialogOpen) {
-      setApiKeysDialogOpen(false);
+    if (!currentApiKeysSet.groq) {
+      setApiKeysDialogOpen(true);
     }
-  }, [apiKeysDialogOpen]);
+    
+    console.log("Current API keys status:", currentApiKeysSet);
+  }, []);
+  
+  useEffect(() => {
+    const currentApiKeysSet = getApiKeysSet();
+    setLocalApiKeysSet(currentApiKeysSet);
+    
+    if (currentApiKeysSet.groq && !apiKeysDialogOpen && onApiKeysUpdated) {
+      onApiKeysUpdated();
+    }
+  }, [apiKeysDialogOpen, onApiKeysUpdated]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.text.trim()) return;
+    
+    const currentApiKeysSet = getApiKeysSet();
+    if (!currentApiKeysSet.groq) {
+      setApiKeysDialogOpen(true);
+      return;
+    }
+    
     onSubmit(description);
   };
   
@@ -54,12 +74,21 @@ const CharacterForm: React.FC<CharacterFormProps> = ({ onSubmit, isLoading }) =>
       runware: apiKeys.runware,
     });
     
-    setLocalApiKeysSet(getApiKeysSet());
-    setApiKeysDialogOpen(false);
+    const updatedKeys = getApiKeysSet();
+    setLocalApiKeysSet(updatedKeys);
     
-    // Show success toast or feedback
+    console.log("API keys set successfully:", updatedKeys);
+    
     if (apiKeys.groq) {
-      console.log("API keys set successfully!");
+      setApiKeysDialogOpen(false);
+      
+      if (onApiKeysUpdated) {
+        setTimeout(() => {
+          onApiKeysUpdated();
+        }, 100);
+      }
+    } else {
+      toast.error("Groq API key is required");
     }
   };
 
